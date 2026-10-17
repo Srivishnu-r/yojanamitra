@@ -1,0 +1,504 @@
+/* ==========================================================================
+   Mitra — the on-screen anime companion.
+   All poses are CSS transforms on SVG groups, keyed off `[data-gesture]`.
+   ========================================================================== */
+
+.mitra {
+  position: fixed;
+  right: 22px;
+  bottom: 20px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.94);
+  transform-origin: bottom right;
+}
+
+.mitra-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* ------------------------------- the figure ------------------------------- */
+
+.mitra-stage {
+  position: relative;
+  width: 176px;
+  height: 216px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 14px 22px rgba(20, 22, 31, 0.18));
+  transition: transform 0.3s ease;
+}
+
+.mitra-stage:hover {
+  transform: translateY(-4px);
+}
+
+.mitra-stage:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.mitra-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mitra-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 96px;
+  height: 16px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(20, 22, 31, 0.22), rgba(20, 22, 31, 0) 70%);
+  border-radius: 50%;
+  animation: mitra-shadow 4s ease-in-out infinite;
+}
+
+/* Base pose: gentle breathing. */
+.mitra-body-wrap {
+  transform-box: view-box;
+  transform-origin: 110px 330px;
+  animation: mitra-breathe 4.2s ease-in-out infinite;
+}
+
+.mitra-head {
+  transform-box: view-box;
+  transform-origin: 110px 150px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.mitra-arm {
+  transform-box: view-box;
+  transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.mitra-arm-r {
+  transform-origin: 66px 196px;
+}
+
+.mitra-arm-l {
+  transform-origin: 154px 196px;
+}
+
+/* Blinking eyes. */
+.mitra-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mitra-blink 5.4s infinite;
+}
+
+/* --------------------------- poses by gesture ----------------------------- */
+
+/* Namaste: hands meet at the chest with a small bow. */
+.mitra[data-gesture='namaste'] .mitra-arm-r {
+  transform: translate(0, -13px) rotate(-47deg);
+}
+.mitra[data-gesture='namaste'] .mitra-arm-l {
+  transform: translate(0, -13px) rotate(47deg);
+}
+.mitra[data-gesture='namaste'] .mitra-body-wrap {
+  animation: mitra-bow 1.6s ease-in-out;
+}
+.mitra[data-gesture='namaste'] .mitra-head {
+  transform: translateY(4px) rotate(0deg);
+}
+
+/* Greeting wave — raised right hand with a little wobble. */
+.mitra[data-gesture='wave'] .mitra-arm-r {
+  transform: rotate(150deg);
+  animation: mitra-wave 0.5s ease-in-out infinite;
+}
+
+/* Thinking — hand near the chin, head tilted. */
+.mitra[data-gesture='think'] .mitra-arm-r {
+  transform: rotate(-150deg);
+}
+.mitra[data-gesture='think'] .mitra-head {
+  transform: rotate(-6deg);
+}
+
+/* Pointing — arm raised, presenting toward the screen. */
+.mitra[data-gesture='point'] .mitra-arm-r {
+  transform: rotate(148deg);
+}
+.mitra[data-gesture='point'] .mitra-head {
+  transform: rotate(-4deg);
+}
+
+/* Celebration — both arms up, body bounces. */
+.mitra[data-gesture='celebrate'] .mitra-arm-r {
+  transform: rotate(152deg);
+}
+.mitra[data-gesture='celebrate'] .mitra-arm-l {
+  transform: rotate(-152deg);
+}
+.mitra[data-gesture='celebrate'] .mitra-body-wrap {
+  animation: mitra-hop 0.6s ease-in-out 3;
+}
+
+/* ------------------------------- talking ---------------------------------- */
+
+.mitra-mouth-open {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mitra[data-talking='true'] .mitra-mouth-smile {
+  opacity: 0;
+}
+
+.mitra[data-talking='true'] .mitra-mouth-open {
+  opacity: 1;
+  animation: mitra-talk 0.26s ease-in-out infinite alternate;
+}
+
+/* ------------------------------ speech bubble ----------------------------- */
+
+.mitra-bubble {
+  position: relative;
+  width: min(292px, 74vw);
+  padding: 14px 34px 14px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r) var(--r) 4px var(--r);
+  box-shadow: var(--sh-3);
+  pointer-events: auto;
+  animation: mitra-pop 0.32s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.mitra-bubble::after {
+  content: '';
+  position: absolute;
+  right: 30px;
+  bottom: -9px;
+  width: 16px;
+  height: 16px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+
+.mitra-bubble-text {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.mitra-typing {
+  color: var(--saffron);
+  animation: mitra-caret 0.8s steps(2) infinite;
+}
+
+.mitra-bubble-status {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.mitra-bubble-x {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: var(--line-2);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.mitra-bubble-x:hover {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.mitra-bubble-speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 9px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--saffron-soft);
+  color: var(--saffron-dark);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mitra-bubble-speak:hover {
+  background: #ffe3cc;
+}
+
+/* -------------------------------- chat input ------------------------------ */
+
+.mitra-panel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(340px, 84vw);
+  padding: 6px 6px 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  box-shadow: var(--sh-2);
+  pointer-events: auto;
+  animation: mitra-pop 0.28s ease;
+}
+
+.mitra-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.mitra-send {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--saffron);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.mitra-send:hover:not(:disabled) {
+  background: var(--saffron-dark);
+  transform: scale(1.05);
+}
+
+.mitra-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* When the panel is open, give the figure a subtle attentive lift. */
+.mitra[data-open='true'] .mitra-stage {
+  filter: drop-shadow(0 16px 26px rgba(244, 114, 22, 0.28));
+}
+
+/* ------------------------ the reaching hand + ripple ---------------------- */
+
+.mitra-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 46px;
+  height: 50px;
+  margin: -40px 0 0 -6px;
+  pointer-events: none;
+  z-index: 1000;
+  transition: transform 0.72s cubic-bezier(0.33, 1.18, 0.62, 1);
+  filter: drop-shadow(0 8px 12px rgba(20, 22, 31, 0.28));
+  will-change: transform;
+}
+
+.mitra-ghost-hand {
+  width: 100%;
+  height: 100%;
+  transform-origin: 15% 12%;
+  transition: transform 0.14s ease;
+}
+
+.mitra-ghost[data-tap='true'] .mitra-ghost-hand {
+  transform: scale(0.8) rotate(-16deg);
+}
+
+.mitra-ripple {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  border: 3px solid var(--saffron);
+  pointer-events: none;
+  z-index: 1001;
+  animation: mitra-ripple 0.75s ease-out forwards;
+}
+
+/* Applied to whatever real element Mitra taps. */
+.mitra-attention {
+  position: relative;
+  z-index: 2;
+  outline: 3px solid var(--saffron);
+  outline-offset: 3px;
+  border-radius: 12px;
+  animation: mitra-attention 0.9s ease;
+}
+
+/* -------------------------------- keyframes ------------------------------- */
+
+@keyframes mitra-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes mitra-bow {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  45% {
+    transform: translateY(6px) scaleY(0.982);
+  }
+}
+
+@keyframes mitra-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes mitra-wave {
+  0%,
+  100% {
+    transform: rotate(150deg);
+  }
+  50% {
+    transform: rotate(134deg);
+  }
+}
+
+@keyframes mitra-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes mitra-talk {
+  from {
+    transform: scaleY(1) scaleX(1);
+  }
+  to {
+    transform: scaleY(0.34) scaleX(0.92);
+  }
+}
+
+@keyframes mitra-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mitra-caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes mitra-shadow {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: translateX(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 0.65;
+    transform: translateX(-50%) scaleX(0.9);
+  }
+}
+
+@keyframes mitra-ripple {
+  from {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.4);
+  }
+}
+
+@keyframes mitra-attention {
+  0%,
+  100% {
+    outline-color: var(--saffron);
+  }
+  50% {
+    outline-color: rgba(244, 114, 22, 0.25);
+  }
+}
+
+/* ------------------------------- responsive ------------------------------- */
+
+@media (max-width: 640px) {
+  .mitra {
+    right: 12px;
+    bottom: 12px;
+  }
+  .mitra-stage {
+    width: 132px;
+    height: 162px;
+  }
+  .mitra-bubble {
+    width: min(260px, 82vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mitra-body-wrap,
+  .mitra-eye,
+  .mitra-shadow,
+  .mitra[data-gesture] .mitra-arm-r,
+  .mitra[data-gesture] .mitra-arm-l,
+  .mitra[data-gesture='celebrate'] .mitra-body-wrap,
+  .mitra[data-gesture='namaste'] .mitra-body-wrap,
+  .mitra[data-talking='true'] .mitra-mouth-open {
+    animation: none !important;
+  }
+  .mitra-ghost {
+    transition: none;
+  }
+}
